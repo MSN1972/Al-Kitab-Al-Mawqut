@@ -1,0 +1,36 @@
+name: Build Android TV APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Fetch public-domain Kaaba background
+        run: |
+          mkdir -p app/src/main/assets
+          curl -L --fail --retry 2 --connect-timeout 10 --max-time 50 "https://commons.wikimedia.org/wiki/Special:FilePath/Al-Kaaba_in_Mecca.jpg" -o app/src/main/assets/kaaba_background.jpg || rm -f app/src/main/assets/kaaba_background.jpg
+      - name: Run unit tests
+        run: gradle --no-daemon :app:testDebugUnitTest
+      - name: Build debug APK
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Al-Kitab-Al-Mawqut-Debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
