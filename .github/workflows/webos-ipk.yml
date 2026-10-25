@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'webos-source.tar.xz'
+      - 'site-assets/patch_v03_clock.py'
+      - 'site-assets/clock-layout.test.cjs'
       - '.github/workflows/webos-ipk.yml'
 permissions:
   contents: read
@@ -19,8 +21,12 @@ jobs:
           node-version: '24'
       - name: Extract webOS source
         run: tar -xJf webos-source.tar.xz
-      - name: Test prayer and quiet-mode logic
-        run: node --test webos/tests/prayer-core.test.cjs
+      - name: Apply unified clock and date layout (v0.3.0)
+        run: |
+          python3 site-assets/patch_v03_clock.py
+          cp site-assets/clock-layout.test.cjs webos/tests/clock-layout.test.cjs
+      - name: Test prayer, quiet-mode and unified date layout
+        run: node --test webos/tests/*.test.cjs
       - name: Download CC0 licensed 4K Kaaba background
         run: |
           mkdir -p webos/assets
