@@ -40,7 +40,7 @@ jobs:
           from pathlib import Path
           f = Path('webos/index.html')
           html = f.read_text('utf-8')
-          html = html.replace('<script src="prayer-core.js"></script><script src="main.js"></script>', '<script src="calendar-boot.js"></script><script src="prayer-core.js"></script><script src="main.js"></script>')
+          html = html.replace('<script src="prayer-core.js"></script>', '<script src="calendar-boot.js"></script><script src="prayer-core.js"></script>')
           if 'calendar-boot.js' not in html: raise RuntimeError('Calendar boot injection failed')
           f.write_text(html,encoding='utf-8')
           Path('webos/.nojekyll').touch()
@@ -51,6 +51,11 @@ jobs:
           curl -fLS --retry 3 --retry-delay 2 --max-time 150 -A 'AlKitabMawqut/0.2 (mosque display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
           test "$(stat -c %s webos/assets/kaaba-4k.jpg)" -gt 2000000
           file webos/assets/kaaba-4k.jpg
+      - name: Generate cinematic image at true 4K resolution
+        run: |
+          python -m pip install --quiet --disable-pip-version-check numpy pillow
+          python site-assets/grade_photo_v06.py
+          rm -f webos/assets/kaaba-4k.jpg
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
