@@ -1,0 +1,43 @@
+name: Build LG webOS IPK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'webos-source.tar.xz'
+      - '.github/workflows/webos-ipk.yml'
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Extract webOS source
+        run: tar -xJf webos-source.tar.xz
+      - name: Test prayer and quiet-mode logic
+        run: node --test webos/tests/prayer-core.test.cjs
+      - name: Download CC0 licensed 4K Kaaba background
+        run: |
+          mkdir -p webos/assets
+          curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 150 --user-agent 'AlKitabMawqut/0.1 (mosque prayer display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
+          file webos/assets/kaaba-4k.jpg
+          test $(stat -c %s webos/assets/kaaba-4k.jpg) -gt 2000000
+      - name: Install webOS CLI
+        run: npm install -g @webos-tools/cli
+      - name: Build IPK
+        run: |
+          ares-config -p tv
+          mkdir -p dist
+          ares-package webos -o dist
+          test -n "$(find dist -name '*.ipk' -type f -print -quit)"
+          ls -lh dist/*.ipk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Al-Kitab-Al-Mawqut-LG-webOS-IPK
+          path: dist/*.ipk
+          if-no-files-found: error
