@@ -26,6 +26,7 @@ jobs:
         run: |
           tar -xJf webos-source.tar.xz
           python site-assets/patch_v061_phone.py
+          cp site-assets/mobile-symbol-v061.test.cjs webos/tests/mobile-symbol-v061.test.cjs
       - name: Replace old remembrance layout with approved eight-line screen
         run: python site-assets/patch_adhkar_v070.py
       - name: Verify new version, content and scheduling
