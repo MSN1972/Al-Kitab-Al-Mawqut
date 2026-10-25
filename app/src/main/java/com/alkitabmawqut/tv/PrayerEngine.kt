@@ -19,7 +19,8 @@ data class ScreenState(
  val activePrayerIndex: Int?,
  val nextEvent: PrayerEvent?,
  val secondsUntilIqama: Long?,
- val postPrayerIndex: Int? = null,\n val postPrayerElapsedSeconds: Long? = null
+ val postPrayerIndex: Int? = null,
+ val postPrayerElapsedSeconds: Long? = null
 )
 
 object PrayerEngine {
