@@ -1,0 +1,62 @@
+name: Publish LG browser preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'webos-source.tar.xz'
+      - 'site-assets/**'
+      - '.github/workflows/lg-browser-pages.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '15 1 * * *'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: lg-browser-pages
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Extract existing LG webOS browser UI
+        run: tar -xJf webos-source.tar.xz
+      - name: Run deterministic prayer transition tests
+        run: node --test webos/tests/prayer-core.test.cjs
+      - name: Bundle validated Makkah calendars locally (avoid TV cross-origin/API dependency)
+        run: python site-assets/generate_calendar.py
+      - name: Prepare standalone browser screen
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          f = Path('webos/index.html')
+          html = f.read_text('utf-8')
+          html = html.replace('<script src="prayer-core.js"></script><script src="main.js"></script>', '<script src="calendar-boot.js"></script><script src="prayer-core.js"></script><script src="main.js"></script>')
+          if 'calendar-boot.js' not in html: raise RuntimeError('Calendar boot injection failed')
+          f.write_text(html,encoding='utf-8')
+          Path('webos/.nojekyll').touch()
+          PY
+      - name: Download CC0 4096px Kaaba photo
+        run: |
+          mkdir -p webos/assets
+          curl -fLS --retry 3 --retry-delay 2 --max-time 150 -A 'AlKitabMawqut/0.2 (mosque display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
+          test "$(stat -c %s webos/assets/kaaba-4k.jpg)" -gt 2000000
+          file webos/assets/kaaba-4k.jpg
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./webos
+      - name: Deploy site
+        id: deployment
+        uses: actions/deploy-pages@v4
