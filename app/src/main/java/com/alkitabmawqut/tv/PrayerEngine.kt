@@ -19,7 +19,7 @@ data class ScreenState(
  val activePrayerIndex: Int?,
  val nextEvent: PrayerEvent?,
  val secondsUntilIqama: Long?,
- val postPrayerIndex: Int? = null
+ val postPrayerIndex: Int? = null,\n val postPrayerElapsedSeconds: Long? = null
 )
 
 object PrayerEngine {
@@ -31,7 +31,7 @@ object PrayerEngine {
         val seconds = adhkarMinutes.coerceIn(0,15).toLong() * 60L
         if (seconds > 0) {
          val post = sorted.lastOrNull { second >= it.quietEndEpochSecond() && second < it.quietEndEpochSecond() + seconds }
-         if (post != null) return ScreenState(false, null, null, null, post.prayerIndex)
+         if (post != null) return ScreenState(false, null, null, null, post.prayerIndex, second - post.quietEndEpochSecond())
         }
         val next = sorted.firstOrNull { it.iqamaEpochSecond() > second }
         return ScreenState(false, null, next, next?.iqamaEpochSecond()?.minus(second))

@@ -108,7 +108,7 @@ private fun PrayerTV(activity: ComponentActivity) {
   return
  }
  if (screen.postPrayerIndex != null || now.toInstant().toEpochMilli() < adhkarPreviewUntil) {
-  PostPrayerScreen(screen.postPrayerIndex?.let { names[it] } ?: "الصلاة المفروضة")
+  PostPrayerScreen(screen.postPrayerIndex?.let { names[it] } ?: "الصلاة المفروضة", PostPrayerPresentation.pageAt(screen.postPrayerElapsedSeconds ?: 0L, adhkarMinutes.toLong() * 60L))
   return
  }
  BackHandler(enabled = settings) { settings = false }
