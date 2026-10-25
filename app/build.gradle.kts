@@ -13,6 +13,13 @@ android {
         versionCode = 7
         versionName = "0.7.0-beta"
     }
+    // Debug previews install beside the existing mosque display app.
+    // Release applicationId is unchanged for future store distribution.
+    buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".preview"
+        }
+    }
     buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
