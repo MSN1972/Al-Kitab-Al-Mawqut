@@ -69,11 +69,11 @@ for filename in ["clock-layout.test.cjs","mobile-symbol-v061.test.cjs","release-
     f=tests/filename
     txt=f.read_text("utf8").replace("'0.6.1'","'0.7.0'")
     if filename=="mobile-symbol-v061.test.cjs":
-        txt=txt.replace("صحيح مسلم \\\\(592\\\\) — رواية ابن نمير","مسلم ٥٩٢ — رواية ابن نمير")
+        txt=txt.replace("صحيح مسلم \\(592\\) — رواية ابن نمير","مسلم ٥٩٢ — رواية ابن نمير")
     f.write_text(txt,"utf8")
 f=tests/"post-prayer.test.cjs";s=f.read_text("utf8")
 s=s.replace('id="post-prayer" class="post-prayer-screen hidden"','id="post-prayer" class="post-prayer-screen hidden adhkar-v07"')
-s=s.replace("صحيح مسلم \\\\(591\\\\)","مسلم ٥٩١").replace("صحيح البخاري \\\\(844\\\\)","صحيح البخاري ٨٤٤").replace("صحيح مسلم \\\\(597\\\\)","صحيح مسلم ٥٩٧")
+s=s.replace("صحيح مسلم \\(591\\)","مسلم ٥٩١").replace("صحيح البخاري \\(844\\)","صحيح البخاري ٨٤٤").replace("صحيح مسلم \\(597\\)","صحيح مسلم ٥٩٧")
 f.write_text(s,"utf8")
 f=tests/"visual-v06.test.cjs";s=f.read_text("utf8");i=s.index("test('remembrance page");j=s.index("test('enhanced CC0",i)
 s=s[:i]+"""test('approved eight unnumbered live text lines replace old 4-card screen',()=>{
