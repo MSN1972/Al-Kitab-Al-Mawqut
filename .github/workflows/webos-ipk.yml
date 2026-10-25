@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'webos-source.tar.xz'
+      - 'site-assets/patch_v061_phone.py'
+      - 'site-assets/mobile-symbol-v061.test.cjs'
       - 'site-assets/grade_photo_v06.py'
       - '.github/workflows/webos-ipk.yml'
 permissions:
@@ -21,12 +23,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Extract complete v0.6 webOS source
+      - name: Extract base v0.6 webOS source
         run: |
           tar -xJf webos-source.tar.xz
           test -f webos/post-prayer-adhkar.json
           test -f webos/hadiths.json
           python -c "import json; a=json.load(open('webos/appinfo.json')); assert a['version']=='0.6.0' and a['id']=='com.alkitabmawqut.tv'"
+      - name: Apply mobile-off icon and verified salam variant
+        run: |
+          python site-assets/patch_v061_phone.py
+          cp site-assets/mobile-symbol-v061.test.cjs webos/tests/mobile-symbol-v061.test.cjs
       - name: Check live display code and run scheduling/design tests
         run: |
           node --check webos/main.js
@@ -52,6 +58,6 @@ jobs:
           ls -lh dist/*.ipk
       - uses: actions/upload-artifact@v4
         with:
-          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.6.0-IPK
+          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.6.1-IPK
           path: dist/*.ipk
           if-no-files-found: error

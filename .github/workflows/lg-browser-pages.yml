@@ -30,6 +30,10 @@ jobs:
           python-version: '3.12'
       - name: Extract existing LG webOS browser UI
         run: tar -xJf webos-source.tar.xz
+      - name: Apply mobile-off icon and verified salam variant
+        run: |
+          python site-assets/patch_v061_phone.py
+          cp site-assets/mobile-symbol-v061.test.cjs webos/tests/mobile-symbol-v061.test.cjs
       - name: Test verified prayer and UI logic
         run: node --test webos/tests/*.test.cjs
       - name: Bundle validated Makkah calendars locally (avoid TV cross-origin/API dependency)
