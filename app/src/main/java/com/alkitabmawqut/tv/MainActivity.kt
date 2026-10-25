@@ -70,6 +70,8 @@ private fun PrayerTV(activity: ComponentActivity) {
  var settings by remember { mutableStateOf(false) }
  var info by remember { mutableStateOf("جاري تحميل المواقيت") }
  var hadithNumber by remember { mutableIntStateOf(0) }
+ var adhkarMinutes by remember { mutableIntStateOf(prefs.getInt("adhkar_minutes", 4).coerceIn(0,15)) }
+ var adhkarPreviewUntil by remember { mutableLongStateOf(0L) }
  val offsets = remember { mutableStateListOf(*List(5) { prefs.getInt("offset_$it", 15) }.toTypedArray()) }
  val quietDurations = remember { mutableStateListOf(*List(5) { prefs.getInt("duration_$it", if (it == 2 || it == 3) 5 else 7) }.toTypedArray()) }
  val picture = remember {
@@ -100,9 +102,13 @@ private fun PrayerTV(activity: ComponentActivity) {
   today?.let { addAll(PrayerEngine.events(now.toLocalDate(), it, offsets, quietDurations)) }
   tomorrow?.let { addAll(PrayerEngine.events(now.toLocalDate().plusDays(1), it, offsets, quietDurations)) }
  }
- val screen = PrayerEngine.calculate(now, events)
+ val screen = PrayerEngine.calculate(now, events, adhkarMinutes)
  if (screen.quiet) {
   Box(Modifier.fillMaxSize().background(Color(0xFF101A25)))
+  return
+ }
+ if (screen.postPrayerIndex != null || now.toInstant().toEpochMilli() < adhkarPreviewUntil) {
+  PostPrayerScreen(screen.postPrayerIndex?.let { names[it] } ?: "الصلاة المفروضة")
   return
  }
  BackHandler(enabled = settings) { settings = false }
@@ -162,6 +168,16 @@ private fun PrayerTV(activity: ComponentActivity) {
        Counter(offsets[i]) { step -> offsets[i] = (offsets[i] + step).coerceIn(0, 120); prefs.edit().putInt("offset_$i", offsets[i]).apply() }
        Text("مدة الصلاة", color = white, fontSize = 16.sp)
        Counter(quietDurations[i]) { step -> quietDurations[i] = (quietDurations[i] + step).coerceIn(1, 30); prefs.edit().putInt("duration_$i", quietDurations[i]).apply() }
+      }
+     }
+     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+      Text("مدة أذكار ما بعد الصلاة (0 للإيقاف)", color = white, fontSize = 17.sp)
+      Counter(adhkarMinutes) { step ->
+       adhkarMinutes = (adhkarMinutes + step).coerceIn(0,15)
+       prefs.edit().putInt("adhkar_minutes", adhkarMinutes).apply()
+      }
+      Button(onClick = { settings = false; adhkarPreviewUntil = now.toInstant().toEpochMilli() + 10000L }) {
+       Text("تجربة الأذكار")
       }
      }
      Button(onClick = { settings = false }, modifier = Modifier.align(Alignment.End)) { Text("حفظ وإغلاق") }

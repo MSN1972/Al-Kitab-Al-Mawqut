@@ -52,6 +52,6 @@ jobs:
           ls -lh dist/*.ipk
       - uses: actions/upload-artifact@v4
         with:
-          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.4.0-IPK
+          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.5.0-IPK
           path: dist/*.ipk
           if-no-files-found: error
