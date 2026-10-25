@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - 'webos-source.tar.xz'
-      - 'site-assets/**'
+      - 'site-assets/generate_calendar.py'
       - '.github/workflows/lg-browser-pages.yml'
   workflow_dispatch:
   schedule:
@@ -30,11 +30,7 @@ jobs:
           python-version: '3.12'
       - name: Extract existing LG webOS browser UI
         run: tar -xJf webos-source.tar.xz
-      - name: Apply unified clock and date layout (v0.3.0)
-        run: |
-          python3 site-assets/patch_v03_clock.py
-          cp site-assets/clock-layout.test.cjs webos/tests/clock-layout.test.cjs
-      - name: Test prayer transitions and unified dates
+      - name: Test verified prayer and UI logic
         run: node --test webos/tests/*.test.cjs
       - name: Bundle validated Makkah calendars locally (avoid TV cross-origin/API dependency)
         run: python site-assets/generate_calendar.py

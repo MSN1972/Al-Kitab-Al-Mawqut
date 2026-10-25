@@ -5,8 +5,6 @@ on:
     branches: [main]
     paths:
       - 'webos-source.tar.xz'
-      - 'site-assets/patch_v03_clock.py'
-      - 'site-assets/clock-layout.test.cjs'
       - '.github/workflows/webos-ipk.yml'
 permissions:
   contents: read
@@ -19,31 +17,35 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Extract webOS source
-        run: tar -xJf webos-source.tar.xz
-      - name: Apply unified clock and date layout (v0.3.0)
+      - name: Extract source
         run: |
-          python3 site-assets/patch_v03_clock.py
-          cp site-assets/clock-layout.test.cjs webos/tests/clock-layout.test.cjs
-      - name: Test prayer, quiet-mode and unified date layout
-        run: node --test webos/tests/*.test.cjs
-      - name: Download CC0 licensed 4K Kaaba background
+          tar -xJf webos-source.tar.xz
+          test -f webos/hadiths.json
+          test -f webos/appinfo.json
+      - name: Test hadith provenance, prayer calculations, layout and remote settings
+        run: |
+          node --check webos/main.js
+          node --check webos/prayer-core.js
+          node --test webos/tests/*.test.cjs
+          node -e "const a=require('./webos/hadiths.json');console.log('Sahihayn hadiths:',a.length)"
+      - name: Fetch CC0 Kaaba background
         run: |
           mkdir -p webos/assets
-          curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 150 --user-agent 'AlKitabMawqut/0.1 (mosque prayer display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
+          curl -L --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 150 --user-agent 'AlKitabMawqut/0.4 (mosque prayer display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
           file webos/assets/kaaba-4k.jpg
           test $(stat -c %s webos/assets/kaaba-4k.jpg) -gt 2000000
       - name: Install webOS CLI
         run: npm install -g @webos-tools/cli
-      - name: Build IPK
+      - name: Build webOS installation package
         run: |
           ares-config -p tv
+          rm -rf webos/tests webos/hadiths.json
           mkdir -p dist
           ares-package webos -o dist
           test -n "$(find dist -name '*.ipk' -type f -print -quit)"
           ls -lh dist/*.ipk
       - uses: actions/upload-artifact@v4
         with:
-          name: Al-Kitab-Al-Mawqut-LG-webOS-IPK
+          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.4.0-IPK
           path: dist/*.ipk
           if-no-files-found: error
