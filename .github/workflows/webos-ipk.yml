@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'webos-source.tar.xz'
+      - 'site-assets/patch_post_prayer_v05.py'
+      - 'site-assets/post-prayer-v05.test.cjs'
       - '.github/workflows/webos-ipk.yml'
 permissions:
   contents: read
@@ -22,6 +24,10 @@ jobs:
           tar -xJf webos-source.tar.xz
           test -f webos/hadiths.json
           test -f webos/appinfo.json
+      - name: Apply verified post-prayer remembrance screen (v0.5.0)
+        run: |
+          python3 site-assets/patch_post_prayer_v05.py
+          cp site-assets/post-prayer-v05.test.cjs webos/tests/post-prayer-v05.test.cjs
       - name: Test hadith provenance, prayer calculations, layout and remote settings
         run: |
           node --check webos/main.js
