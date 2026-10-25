@@ -6,8 +6,7 @@ on:
     paths:
       - 'webos-source.tar.xz'
       - 'site-assets/patch_v061_phone.py'
-      - 'site-assets/mobile-symbol-v061.test.cjs'
-      - 'site-assets/grade_photo_v06.py'
+      - 'site-assets/patch_adhkar_v070.py'
       - '.github/workflows/webos-ipk.yml'
 permissions:
   contents: read
@@ -23,26 +22,32 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Extract base v0.6 webOS source
+      - name: Extract base and apply existing v0.6.1 content patch
         run: |
           tar -xJf webos-source.tar.xz
-          test -f webos/post-prayer-adhkar.json
-          test -f webos/hadiths.json
-          python -c "import json; a=json.load(open('webos/appinfo.json')); assert a['version']=='0.6.0' and a['id']=='com.alkitabmawqut.tv'"
-      - name: Apply mobile-off icon and verified salam variant
-        run: |
           python site-assets/patch_v061_phone.py
-          cp site-assets/mobile-symbol-v061.test.cjs webos/tests/mobile-symbol-v061.test.cjs
-      - name: Check live display code and run scheduling/design tests
+      - name: Replace old remembrance layout with approved eight-line screen
+        run: python site-assets/patch_adhkar_v070.py
+      - name: Verify new version, content and scheduling
         run: |
           node --check webos/main.js
           node --check webos/prayer-core.js
           node --test webos/tests/*.test.cjs
-      - name: Retrieve CC0 original 4K Kaaba photo
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path('webos/index.html').read_text()
+          a=json.loads(Path('webos/appinfo.json').read_text())
+          assert a['id']=='com.alkitabmawqut.tv' and a['version']=='0.7.0'
+          assert d.count('<section class="adhkar-line')==8
+          assert 'post-prayer-card' not in d
+          print('Confirmed new screen is in IPK source')
+          PY
+      - name: Retrieve CC0 4K Kaaba photo
         run: |
-          curl --fail -L --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 150 --user-agent 'AlKitabMawqut/0.6 (prayer display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
+          curl --fail -L --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 150 --user-agent 'AlKitabMawqut/0.7 (mosque prayer display)' 'https://commons.wikimedia.org/wiki/Special:FilePath/Kaaba_Al-Musharrafah.jpg' -o webos/assets/kaaba-4k.jpg
           test "$(stat -c %s webos/assets/kaaba-4k.jpg)" -gt 2000000
-      - name: Color-grade at original photo resolution (no upscaling)
+      - name: Enhance photo at original resolution
         run: |
           python -m pip install --disable-pip-version-check --quiet numpy pillow
           python site-assets/grade_photo_v06.py
@@ -58,6 +63,6 @@ jobs:
           ls -lh dist/*.ipk
       - uses: actions/upload-artifact@v4
         with:
-          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.6.1-IPK
+          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.7.0-IPK
           path: dist/*.ipk
           if-no-files-found: error
