@@ -176,8 +176,9 @@ $('location-apply').onclick=()=>{
 };
 $('location-makkah').onclick=()=>setLocation(locationLayer.MAKKAH);
 '''
-assert "renderHadith();\nsetInterval" in s
-s=s.replace("renderHadith();\nsetInterval",controls+"\nrenderHadith();\nsetInterval",1)
+assert s.rstrip().endswith('})();'), 'Unexpected main.js ending'
+point=s.rfind('})();')
+s=s[:point]+controls+'\n'+s[point:]
 p.write_text(s,'utf-8')
 
 c=W/'style.css';c.write_text(c.read_text('utf-8')+r"""
