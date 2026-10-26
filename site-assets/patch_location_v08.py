@@ -207,5 +207,6 @@ info.write_text(json.dumps(meta,ensure_ascii=False,indent=2)+'\n','utf-8')
 for f in (W/'tests').glob('*.test.cjs'):
  txt=f.read_text('utf-8')
  txt=txt.replace("'0.7.0'","'0.8.0'").replace('"0.7.0"','"0.8.0"')
+ txt=txt.replace('core\\.TIMEZONE','location\\.timezone')
  f.write_text(txt,'utf-8')
 print('Global city chooser, dynamic timezone, city cache and per-country prayer method integrated on LG.')
