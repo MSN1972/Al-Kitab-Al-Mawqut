@@ -7,6 +7,9 @@ on:
       - 'webos-source.tar.xz'
       - 'site-assets/patch_v061_phone.py'
       - 'site-assets/patch_adhkar_v070.py'
+      - 'site-assets/patch_location_v08.py'
+      - 'site-assets/location-layer-webos.js'
+      - 'site-assets/location-webos.test.cjs'
       - '.github/workflows/webos-ipk.yml'
 permissions:
   contents: read
@@ -29,6 +32,10 @@ jobs:
           cp site-assets/mobile-symbol-v061.test.cjs webos/tests/mobile-symbol-v061.test.cjs
       - name: Replace old remembrance layout with approved eight-line screen
         run: python site-assets/patch_adhkar_v070.py
+      - name: Enable global city, country and time zone selection
+        run: |
+          python site-assets/patch_location_v08.py
+          cp site-assets/location-webos.test.cjs webos/tests/location-webos.test.cjs
       - name: Verify new version, content and scheduling
         run: |
           node --check webos/main.js
@@ -39,7 +46,7 @@ jobs:
           from pathlib import Path
           d=Path('webos/index.html').read_text()
           a=json.loads(Path('webos/appinfo.json').read_text())
-          assert a['id']=='com.alkitabmawqut.tv' and a['version']=='0.7.0'
+          assert a['id']=='com.alkitabmawqut.tv' and a['version']=='0.8.0'
           assert d.count('<section class="adhkar-line')==8
           assert 'post-prayer-card' not in d
           print('Confirmed new screen is in IPK source')
@@ -64,6 +71,6 @@ jobs:
           ls -lh dist/*.ipk
       - uses: actions/upload-artifact@v4
         with:
-          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.7.0-IPK
+          name: Al-Kitab-Al-Mawqut-LG-webOS-v0.8.0-IPK
           path: dist/*.ipk
           if-no-files-found: error
