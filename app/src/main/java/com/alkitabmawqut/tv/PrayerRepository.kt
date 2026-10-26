@@ -14,15 +14,22 @@ import java.time.format.DateTimeFormatter
 class PrayerRepository(context: Context) {
     private val names = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
     private val prefs = context.getSharedPreferences("prayer_calendar", Context.MODE_PRIVATE)
-    fun getDay(day: LocalDate): List<Int>? {
-        val value = prefs.getString("month_${YearMonth.from(day)}", null) ?: return null
+    fun getDay(day: LocalDate, location: PrayerLocation): List<Int>? {
+        val month=YearMonth.from(day)
+        val value = (prefs.getString("month_" + month + "_" + location.cacheKey(),null)
+            ?: if(location.id==0L && location.method==4)
+                prefs.getString("month_" + month,null) else null) ?: return null
         return try {
             val arr = JSONObject(value).getJSONArray(day.toString())
             if (arr.length() != 5) null else (0..4).map { arr.getInt(it) }
         } catch (_: Exception) { null }
     }
-    suspend fun syncMonth(month: YearMonth): Boolean = withContext(Dispatchers.IO) {
-        val endpoint = "https://api.aladhan.com/v1/calendar/${month.year}/${month.monthValue}?latitude=21.4225&longitude=39.8262&method=4&timezonestring=Asia%2FRiyadh"
+    suspend fun syncMonth(month: YearMonth, location: PrayerLocation): Boolean = withContext(Dispatchers.IO) {
+        val uriZone=java.net.URLEncoder.encode(location.timezone,"UTF-8")
+        val methodQuery=if(location.method==-1)"" else "&method=" + location.method
+        val endpoint="https://api.aladhan.com/v1/calendar/" + month.year + "/" + month.monthValue +
+            "?latitude=" + location.latitude + "&longitude=" + location.longitude +
+            "&timezonestring=" + uriZone + methodQuery
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             connectTimeout = 12000; readTimeout = 12000; requestMethod = "GET"
         }
@@ -49,7 +56,7 @@ class PrayerRepository(context: Context) {
                 saved.put(day.toString(), mins)
             }
             if (saved.length() != month.lengthOfMonth()) return@withContext false
-            prefs.edit().putString("month_$month", saved.toString()).apply()
+            prefs.edit().putString("month_" + month + "_" + location.cacheKey(), saved.toString()).apply()
             true
         } catch (_: Exception) { false } finally { connection.disconnect() }
     }

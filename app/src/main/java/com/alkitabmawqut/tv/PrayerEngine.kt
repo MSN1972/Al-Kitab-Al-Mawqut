@@ -9,9 +9,11 @@ data class PrayerEvent(
     val prayerIndex: Int,
     val adhanMinute: Int,
     val iqamaMinute: Int,
-    val quietMinutes: Int
+    val quietMinutes: Int,
+    val timezone: String = "Asia/Riyadh"
 ) {
-    fun iqamaEpochSecond(): Long = date.atStartOfDay(ZoneId.of("Asia/Riyadh")).toEpochSecond() + iqamaMinute * 60L
+    fun iqamaEpochSecond(): Long =
+        date.atStartOfDay().plusMinutes(iqamaMinute.toLong()).atZone(ZoneId.of(timezone)).toEpochSecond()
     fun quietEndEpochSecond(): Long = iqamaEpochSecond() + quietMinutes * 60L
 }
 data class ScreenState(
@@ -37,8 +39,9 @@ object PrayerEngine {
         val next = sorted.firstOrNull { it.iqamaEpochSecond() > second }
         return ScreenState(false, null, next, next?.iqamaEpochSecond()?.minus(second))
     }
-    fun events(date: LocalDate, times: List<Int>, offsets: List<Int>, durations: List<Int>): List<PrayerEvent> {
+    fun events(date: LocalDate, times: List<Int>, offsets: List<Int>, durations: List<Int>,
+               timezone: String = "Asia/Riyadh"): List<PrayerEvent> {
         if (times.size != 5 || offsets.size != 5 || durations.size != 5) return emptyList()
-        return (0..4).map { i -> PrayerEvent(date, i, times[i], times[i] + offsets[i], durations[i]) }
+        return (0..4).map { i -> PrayerEvent(date, i, times[i], times[i] + offsets[i], durations[i], timezone) }
     }
 }
