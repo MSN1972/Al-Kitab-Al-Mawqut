@@ -30,6 +30,6 @@ class LocationScheduleTest {
         assertNotEquals(base.cacheKey(),base.copy(method=3).cacheKey())
     }
     @Test fun rejectsInvalidZoneInSettings() {
-        assertNull(PrayerLocation.decode(PrayerLocation.MAKKAH.encode().replace("Asia/Riyadh","Fake/Zone")))
+        assertNull(PrayerLocation.decode(PrayerLocation.MAKKAH.copy(timezone="Fake/Zone").encode()))
     }
 }
