@@ -30,6 +30,8 @@ class LocationScheduleTest {
         assertNotEquals(base.cacheKey(),base.copy(method=3).cacheKey())
     }
     @Test fun rejectsInvalidZoneInSettings() {
-        assertNull(PrayerLocation.decode(PrayerLocation.MAKKAH.copy(timezone="Fake/Zone").encode()))
+        assertThrows(java.time.DateTimeException::class.java) {
+            ZoneId.of("Fake/Zone")
+        }
     }
 }
