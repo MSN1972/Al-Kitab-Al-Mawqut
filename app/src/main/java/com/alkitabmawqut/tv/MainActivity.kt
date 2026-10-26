@@ -31,7 +31,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-private val zone = ZoneId.of("Asia/Riyadh")
 private val names = listOf("الفجر", "الظهر", "العصر", "المغرب", "العشاء")
 private val ink = Color(0xFF071C36)
 private val gold = Color(0xFFF0D08A)
@@ -63,7 +62,9 @@ class MainActivity: ComponentActivity() {
 private fun PrayerTV(activity: ComponentActivity) {
  val prefs = remember { activity.getSharedPreferences("prayer_options", 0) }
  val repository = remember { PrayerRepository(activity) }
- var now by remember { mutableStateOf(ZonedDateTime.now(zone)) }
+ var location by remember { mutableStateOf(LocationStore.load(prefs)) }
+ var locationPicker by remember { mutableStateOf(false) }
+ var now by remember { mutableStateOf(ZonedDateTime.now(location.zone())) }
  var yesterday by remember { mutableStateOf<List<Int>?>(null) }
  var today by remember { mutableStateOf<List<Int>?>(null) }
  var tomorrow by remember { mutableStateOf<List<Int>?>(null) }
@@ -78,29 +79,29 @@ private fun PrayerTV(activity: ComponentActivity) {
   try { activity.assets.open("kaaba_background.jpg").use { BitmapFactory.decodeStream(it)?.asImageBitmap() } }
   catch (_: Exception) { null }
  }
- LaunchedEffect(Unit) {
-  while (true) { now = ZonedDateTime.now(zone); delay(1000) }
+ LaunchedEffect(location.timezone) {
+  while (true) { now = ZonedDateTime.now(location.zone()); delay(1000) }
  }
  LaunchedEffect(Unit) {
   while (true) { delay(24000); hadithNumber = (hadithNumber + 1) % hadiths.size }
  }
- LaunchedEffect(now.toLocalDate(), now.hour / 6) {
+ LaunchedEffect(location, now.toLocalDate(), now.hour / 6) {
   val d = now.toLocalDate()
-  yesterday = repository.getDay(d.minusDays(1))
-  today = repository.getDay(d)
-  tomorrow = repository.getDay(d.plusDays(1))
+  yesterday = repository.getDay(d.minusDays(1),location)
+  today = repository.getDay(d,location)
+  tomorrow = repository.getDay(d.plusDays(1),location)
   val months = listOf(YearMonth.from(d), YearMonth.from(d.plusDays(1))).distinct()
   var synced = true
-  for (m in months) if (!repository.syncMonth(m)) synced = false
-  yesterday = repository.getDay(d.minusDays(1))
-  today = repository.getDay(d)
-  tomorrow = repository.getDay(d.plusDays(1))
+  for (m in months) if (!repository.syncMonth(m,location)) synced = false
+  yesterday = repository.getDay(d.minusDays(1),location)
+  today = repository.getDay(d,location)
+  tomorrow = repository.getDay(d.plusDays(1),location)
   info = if (today == null) "المواقيت غير متاحة، تحقق من الإنترنت" else if (synced) "المواقيت محفوظة" else "المواقيت من الذاكرة"
  }
  val events = buildList {
-  yesterday?.let { addAll(PrayerEngine.events(now.toLocalDate().minusDays(1), it, offsets, quietDurations)) }
-  today?.let { addAll(PrayerEngine.events(now.toLocalDate(), it, offsets, quietDurations)) }
-  tomorrow?.let { addAll(PrayerEngine.events(now.toLocalDate().plusDays(1), it, offsets, quietDurations)) }
+  yesterday?.let { addAll(PrayerEngine.events(now.toLocalDate().minusDays(1), it, offsets, quietDurations,location.timezone)) }
+  today?.let { addAll(PrayerEngine.events(now.toLocalDate(), it, offsets, quietDurations,location.timezone)) }
+  tomorrow?.let { addAll(PrayerEngine.events(now.toLocalDate().plusDays(1), it, offsets, quietDurations,location.timezone)) }
  }
  val screen = PrayerEngine.calculate(now, events, adhkarMinutes)
  if (screen.quiet) {
@@ -119,7 +120,9 @@ private fun PrayerTV(activity: ComponentActivity) {
    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
     Column {
      Text("الكتاب الموقوت", color = gold, fontSize = 35.sp, fontWeight = FontWeight.Bold)
-     Text("مكة المكرمة  •  أم القرى", color = white, fontSize = 18.sp)
+     Text(location.label() + " • " + CalculationOptions.title(location.method),
+       color = white, fontSize = 18.sp)
+     Text("المنطقة الزمنية: " + location.timezone, color = gold, fontSize = 15.sp)
     }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
      Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)), color = Color.White, fontSize = 56.sp, fontWeight = FontWeight.Bold)
@@ -160,6 +163,12 @@ private fun PrayerTV(activity: ComponentActivity) {
    Box(Modifier.fillMaxSize().background(Color(0xF207182D)), contentAlignment = Alignment.Center) {
     Column(Modifier.fillMaxWidth(.92f).background(ink, RoundedCornerShape(20.dp)).padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
      Text("أوقات الإقامة ومدة الصلاة", color = gold, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+       Text("الموقع: " + location.label() + " (" + location.timezone + ")", color = white, fontSize = 17.sp)
+       Button(onClick = { settings = false; locationPicker = true }) {
+         Text("البلد والمدينة والمنطقة الزمنية", fontSize = 17.sp)
+       }
+     }
      Text("استخدم ريموت التلفزيون لضبط الدقائق، وتحفظ التغييرات تلقائياً.", color = white, fontSize = 17.sp)
      names.forEachIndexed { i, label ->
       Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
@@ -183,6 +192,19 @@ private fun PrayerTV(activity: ComponentActivity) {
      Button(onClick = { settings = false }, modifier = Modifier.align(Alignment.End)) { Text("حفظ وإغلاق") }
     }
    }
+  }
+  if (locationPicker) {
+   LocationChooser(
+    active = location,
+    onCancel = { locationPicker = false },
+    onApply = { chosen ->
+     LocationStore.save(prefs,chosen)
+     location = chosen
+     yesterday = null; today = null; tomorrow = null
+     info = "جاري تحميل مواقيت " + chosen.city
+     locationPicker = false
+    }
+   )
   }
  }
 }
