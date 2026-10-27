@@ -1,0 +1,42 @@
+name: Build Android Mobile APK
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - 'app/src/main/java/com/alkitabmawqut/tv/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/android-mobile-apk.yml'
+permissions:
+  contents: read
+jobs:
+  android-mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android build tools
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0" || test -d "$ANDROID_HOME/platforms/android-35"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Fetch Kaaba photograph for mobile screen
+        run: |
+          mkdir -p mobile/src/main/assets
+          curl -L --fail --retry 2 --connect-timeout 10 --max-time 50 "https://commons.wikimedia.org/wiki/Special:FilePath/Al-Kaaba_in_Mecca.jpg" -o mobile/src/main/assets/kaaba_background.jpg || rm -f mobile/src/main/assets/kaaba_background.jpg
+      - name: Run mobile unit tests
+        run: gradle --no-daemon :mobile:testDebugUnitTest
+      - name: Build Android phone APK
+        run: gradle --no-daemon --stacktrace :mobile:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Al-Kitab-Al-Mawqut-Android-Mobile-APK
+          path: mobile/build/outputs/apk/debug/mobile-debug.apk
+          if-no-files-found: error
