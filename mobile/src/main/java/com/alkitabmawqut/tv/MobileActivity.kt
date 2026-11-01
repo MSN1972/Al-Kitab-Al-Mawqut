@@ -304,8 +304,6 @@ private fun MobileAdhkar(modifier: Modifier) {
     Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 14.dp),
         verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Text("أذكار ما بعد الصلاة", color = gold, fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text("مما صح عن النبي ﷺ — تُعرض الأذكار الثلاثة هنا دون انتقال تلقائي",
-            color = cream, fontSize = 13.sp)
         postPrayerPages.forEach { dhikr ->
             Column(
                 Modifier.fillMaxWidth().border(1.dp, gold, shape)
