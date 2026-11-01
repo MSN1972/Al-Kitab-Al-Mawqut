@@ -10,14 +10,14 @@ android {
         applicationId = "com.alkitabmawqut.tv"
         minSdk = 26
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.9.0-beta"
+        versionCode = 10
+        versionName = "0.9.1-beta"
     }
     // Debug previews install beside the existing mosque display app.
     // Release applicationId is unchanged for future store distribution.
     buildTypes {
         getByName("debug") {
-            applicationIdSuffix = ".preview"
+            applicationIdSuffix = ".review20261101"
         }
     }
     buildFeatures { compose = true }

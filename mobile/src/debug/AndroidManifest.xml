@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application
+        android:label="الكتاب الموقوت - اختبار الجوال 0.1.1"
+        tools:replace="android:label" />
+</manifest>
