@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -87,6 +89,14 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     var following by remember { mutableStateOf<List<Int>?>(null) }
     var dataStatus by remember { mutableStateOf("جاري تحميل المواقيت...") }
     var page by remember { mutableStateOf("home") }
+    var showHomeNavigation by remember { mutableStateOf(false) }
+    var menuInteraction by remember { mutableIntStateOf(0) }
+    LaunchedEffect(page, menuInteraction) {
+        if (page == "home" && showHomeNavigation) {
+            delay(5000)
+            showHomeNavigation = false
+        }
+    }
     val offsets = remember {
         mutableStateListOf(*List(5) { preferences.getInt("offset_$it", 15).coerceIn(0,120) }.toTypedArray())
     }
@@ -135,7 +145,19 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     // Respect Samsung/Android 15 status/navigation bars and the on-screen keyboard.
     // The bottom tabs must remain inside the safe drawing area on all phone sizes.
     Column(Modifier.fillMaxSize().background(midnight)
-        .windowInsetsPadding(WindowInsets.safeDrawing).imePadding()) {
+        .windowInsetsPadding(WindowInsets.safeDrawing).imePadding()
+        .pointerInput(page) {
+            awaitPointerEventScope {
+                while (true) {
+                    val event = awaitPointerEvent()
+                    if (page == "home" && (event.type == PointerEventType.Move ||
+                            event.type == PointerEventType.Press)) {
+                        showHomeNavigation = true
+                        menuInteraction++
+                    }
+                }
+            }
+        }) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -166,21 +188,26 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                 },
                 modifier = Modifier.weight(1f))
         }
-        Row(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(7.dp)
-        ) {
-            listOf(Triple("home", "المواقيت", "⌚"), Triple("adhkar","الأذكار","☪"),
-                Triple("settings","الإعدادات","⚙")).forEach { item ->
-                Button(
-                    onClick = { page = item.first },
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (page == item.first) gold else navyCard,
-                        contentColor = if (page == item.first) midnight else cream
-                    ),
-                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 8.dp)
-                ) { Text(item.second, fontSize = 14.sp, maxLines = 1) }
+        if (page != "home" || showHomeNavigation) {
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(7.dp)
+            ) {
+                listOf(Triple("home", "المواقيت", "⌚"), Triple("adhkar","الأذكار","☪"),
+                    Triple("settings","الإعدادات","⚙")).forEach { item ->
+                    Button(
+                        onClick = {
+                            page = item.first
+                            if (page == "home") showHomeNavigation = false
+                        },
+                        modifier = Modifier.weight(1f),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (page == item.first) gold else navyCard,
+                            contentColor = if (page == item.first) midnight else cream
+                        ),
+                        contentPadding = PaddingValues(horizontal = 5.dp, vertical = 8.dp)
+                    ) { Text(item.second, fontSize = 14.sp, maxLines = 1) }
+                }
             }
         }
     }
