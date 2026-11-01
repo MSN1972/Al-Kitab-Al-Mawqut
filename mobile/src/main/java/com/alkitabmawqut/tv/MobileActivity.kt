@@ -17,6 +17,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -44,7 +45,15 @@ private val midnight = Color(0xFF071827)
 private val navyCard = Color(0xFF133047)
 private val gold = Color(0xFFF3D38A)
 private val cream = Color(0xFFFFF8EA)
-private val shape = RoundedCornerShape(18.dp)
+private val shape = RoundedCornerShape(16.dp)
+private val entryColors @Composable get() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = cream, unfocusedTextColor = cream,
+    focusedLabelColor = gold, unfocusedLabelColor = cream,
+    focusedBorderColor = gold, unfocusedBorderColor = Color(0xFF9AB2C7),
+    cursorColor = gold,
+    focusedPlaceholderColor = cream, unfocusedPlaceholderColor = cream
+)
+
 private val prayerNames = listOf("الفجر", "الظهر", "العصر", "المغرب", "العشاء")
 private fun mobileTime(minute: Int) = "%02d:%02d".format(Locale.US, (minute / 60) % 24, minute % 60)
 private fun remaining(seconds: Long?): String {
@@ -128,11 +137,11 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     Column(Modifier.fillMaxSize().background(midnight)
         .windowInsetsPadding(WindowInsets.safeDrawing).imePadding()) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 6.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 8.dp, bottom = 3.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("الكتاب الموقوت", color = gold, fontSize = 25.sp, fontWeight = FontWeight.Bold)
+            Text("الكتاب الموقوت", color = gold, fontSize = 23.sp, fontWeight = FontWeight.Bold)
             Text(if (page == "home") "نسخة الجوال" else when(page) {
                 "adhkar" -> "الأذكار"; else -> "الإعدادات"
             }, color = cream, fontSize = 15.sp)
@@ -158,7 +167,7 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                 modifier = Modifier.weight(1f))
         }
         Row(
-            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(7.dp)
         ) {
             listOf(Triple("home", "المواقيت", "⌚"), Triple("adhkar","الأذكار","☪"),
@@ -170,7 +179,7 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                         containerColor = if (page == item.first) gold else navyCard,
                         contentColor = if (page == item.first) midnight else cream
                     ),
-                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 11.dp)
+                    contentPadding = PaddingValues(horizontal = 5.dp, vertical = 8.dp)
                 ) { Text(item.second, fontSize = 14.sp, maxLines = 1) }
             }
         }
@@ -191,7 +200,7 @@ private fun MobileHome(
     Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 14.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
-            Modifier.fillMaxWidth().height(202.dp)
+            Modifier.fillMaxWidth().height(174.dp)
                 .background(Brush.verticalGradient(listOf(navyCard, midnight)), shape)
         ) {
             if (kaaba != null) {
@@ -200,13 +209,13 @@ private fun MobileHome(
             }
             Box(Modifier.fillMaxSize().background(Color(0x99051829), shape))
             Column(
-                Modifier.fillMaxSize().padding(14.dp),
+                Modifier.fillMaxSize().padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(location.label(), color = gold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)),
-                    color = cream, fontSize = 48.sp, fontWeight = FontWeight.Bold)
+                    color = cream, fontSize = 40.sp, fontWeight = FontWeight.Bold)
                 val civil = now.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.forLanguageTag("ar")))
                 Text(civil, color = cream, fontSize = 16.sp)
                 val hijri = remember(now.toLocalDate()) {
@@ -219,31 +228,31 @@ private fun MobileHome(
         }
         Column(
             Modifier.fillMaxWidth().border(1.dp, gold, shape)
-                .background(navyCard, shape).padding(16.dp),
+                .background(navyCard, shape).padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text("المتبقي على الإقامة", color = gold, fontSize = 18.sp)
             Text(remaining(next.secondsUntilIqama), color = cream,
-                fontWeight = FontWeight.Bold, fontSize = 36.sp)
+                fontWeight = FontWeight.Bold, fontSize = 33.sp)
             Text(next.nextEvent?.let { "صلاة " + prayerNames[it.prayerIndex] }
                 ?: "لا تتوفر بيانات الإقامة", color = cream, fontSize = 18.sp)
         }
-        Text("مواقيت اليوم", color = gold, fontSize = 23.sp, fontWeight = FontWeight.Bold)
+        Text("مواقيت اليوم", color = gold, fontSize = 21.sp, fontWeight = FontWeight.Bold)
         prayerNames.forEachIndexed { i, title ->
             val minutes = times?.getOrNull(i)
             Row(
                 Modifier.fillMaxWidth()
                     .background(if (next.nextEvent?.date == now.toLocalDate() &&
                         next.nextEvent?.prayerIndex == i) Color(0xFF324154) else navyCard, shape)
-                    .padding(horizontal = 18.dp, vertical = 11.dp),
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(title, fontSize = 21.sp, color = gold, fontWeight = FontWeight.SemiBold)
+                Text(title, fontSize = 19.sp, color = gold, fontWeight = FontWeight.SemiBold)
                 Column(horizontalAlignment = Alignment.End) {
                     Text(minutes?.let(::mobileTime) ?: "--:--",
-                        fontSize = 21.sp, color = cream, fontWeight = FontWeight.Bold)
+                        fontSize = 19.sp, color = cream, fontWeight = FontWeight.Bold)
                     Text(minutes?.let { "الإقامة: " + mobileTime(it + offsets[i]) }
                         ?: "لا تتوفر المواقيت", fontSize = 13.sp, color = cream)
                 }
@@ -260,34 +269,34 @@ private fun MobileHome(
 @Composable
 private fun MobileAdhkar(modifier: Modifier) {
     Column(modifier.verticalScroll(rememberScrollState()).padding(horizontal = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Text("أذكار ما بعد الصلاة", color = gold, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Text("مما صح عن النبي ﷺ — تُعرض الأذكار الثلاثة هنا دون انتقال تلقائي",
-            color = cream, fontSize = 14.sp)
+            color = cream, fontSize = 13.sp)
         postPrayerPages.forEach { dhikr ->
             Column(
                 Modifier.fillMaxWidth().border(1.dp, gold, shape)
-                    .background(navyCard, shape).padding(17.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .background(navyCard, shape).padding(13.dp),
+                verticalArrangement = Arrangement.spacedBy(7.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(dhikr.title, color = gold, fontSize = 21.sp, fontWeight = FontWeight.Bold,
+                Text(dhikr.title, color = gold, fontSize = 19.sp, fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center)
-                Text(dhikr.text, color = cream, fontSize = 19.sp, lineHeight = 29.sp,
+                Text(dhikr.text, color = cream, fontSize = 17.sp, lineHeight = 25.sp,
                     textAlign = TextAlign.Center)
                 Text(dhikr.source, color = gold, fontSize = 14.sp)
             }
         }
         Column(
             Modifier.fillMaxWidth().border(1.dp, gold, shape)
-                .background(navyCard, shape).padding(15.dp),
+                .background(navyCard, shape).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("المعوذات بعد الصلاة", color = gold,
-                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                fontSize = 19.sp, fontWeight = FontWeight.Bold)
             Text(MUAWWIDHAT_GUIDANCE, color = cream,
-                fontSize = 16.sp, lineHeight = 24.sp, textAlign = TextAlign.Center)
+                fontSize = 15.sp, lineHeight = 22.sp, textAlign = TextAlign.Center)
         }
         Spacer(Modifier.height(8.dp))
     }
@@ -321,10 +330,10 @@ private fun MobileSettings(
         }
         OutlinedTextField(value = city, onValueChange = { city = it },
             label = { Text("المدينة — مثال: Damascus") },
-            modifier = Modifier.fillMaxWidth(), singleLine = true)
+            modifier = Modifier.fillMaxWidth(), singleLine = true, colors = entryColors)
         OutlinedTextField(value = country, onValueChange = { country = it },
             label = { Text("البلد (اختياري)") },
-            modifier = Modifier.fillMaxWidth(), singleLine = true)
+            modifier = Modifier.fillMaxWidth(), singleLine = true, colors = entryColors)
         Button(onClick = {
             scope.launch {
                 searching = true
@@ -339,7 +348,8 @@ private fun MobileSettings(
                     message = "تعذّر البحث؛ تحقق من الإنترنت"
                 } finally { searching = false }
             }
-        }, enabled = !searching && city.trim().length >= 2) { Text("البحث عن المدينة") }
+        }, enabled = !searching && city.trim().length >= 2,
+            colors = ButtonDefaults.buttonColors(containerColor = gold, contentColor = midnight)) { Text("البحث عن المدينة") }
         if (message.isNotEmpty()) Text(message, color = gold, fontSize = 14.sp)
         if (chosen == null) {
             results.take(8).forEach { item ->
@@ -372,10 +382,12 @@ private fun MobileSettings(
                 Text(name, color = cream, fontSize = 17.sp)
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Button(onClick = { onOffset(i, (offsets[i] - 1).coerceAtLeast(0)) },
-                        contentPadding = PaddingValues(horizontal = 12.dp)) { Text("−") }
+                        contentPadding = PaddingValues(horizontal = 12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = navyCard, contentColor = gold)) { Text("−") }
                     Text("  " + offsets[i] + "  ", color = gold, fontSize = 17.sp)
                     Button(onClick = { onOffset(i, (offsets[i] + 1).coerceAtMost(120)) },
-                        contentPadding = PaddingValues(horizontal = 12.dp)) { Text("+") }
+                        contentPadding = PaddingValues(horizontal = 12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = navyCard, contentColor = gold)) { Text("+") }
                 }
             }
         }
