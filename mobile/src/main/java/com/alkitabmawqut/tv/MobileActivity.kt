@@ -278,6 +278,17 @@ private fun MobileAdhkar(modifier: Modifier) {
                 Text(dhikr.source, color = gold, fontSize = 14.sp)
             }
         }
+        Column(
+            Modifier.fillMaxWidth().border(1.dp, gold, shape)
+                .background(navyCard, shape).padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("المعوذات بعد الصلاة", color = gold,
+                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(MUAWWIDHAT_GUIDANCE, color = cream,
+                fontSize = 16.sp, lineHeight = 24.sp, textAlign = TextAlign.Center)
+        }
         Spacer(Modifier.height(8.dp))
     }
 }
