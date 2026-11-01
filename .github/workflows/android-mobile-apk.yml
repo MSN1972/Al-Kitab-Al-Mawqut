@@ -33,6 +33,23 @@ jobs:
         run: |
           mkdir -p mobile/src/main/assets
           curl -L --fail --retry 2 --connect-timeout 10 --max-time 50 "https://commons.wikimedia.org/wiki/Special:FilePath/Al-Kaaba_in_Mecca.jpg" -o mobile/src/main/assets/kaaba_background.jpg || rm -f mobile/src/main/assets/kaaba_background.jpg
+      - name: Enhance real Kaaba photo for brighter architectural lighting
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image, ImageEnhance
+          p = Path("mobile/src/main/assets/kaaba_background.jpg")
+          if p.exists():
+              img = Image.open(p).convert("RGB")
+              img = ImageEnhance.Brightness(img).enhance(1.30)
+              img = ImageEnhance.Contrast(img).enhance(1.14)
+              img = ImageEnhance.Color(img).enhance(1.08)
+              img.save(p, "JPEG", quality=93, optimize=True)
+              print("Enhanced Grand Mosque photograph:", img.size)
+          else:
+              print("Warning: photograph unavailable; app will use fallback gradient.")
+          PY
       - name: Run mobile unit tests
         run: gradle --no-daemon :mobile:testDebugUnitTest
       - name: Build Android phone APK

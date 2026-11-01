@@ -234,7 +234,13 @@ private fun MobileHome(
                 Image(bitmap = kaaba, contentDescription = "صورة الكعبة المشرفة",
                     modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
             }
-            Box(Modifier.fillMaxSize().background(Color(0x99051829), shape))
+            // Keep the illuminated Grand Mosque clearly visible. A soft edge gradient
+            // protects text readability without blanketing the entire photograph.
+            Box(Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    listOf(Color(0x66051829), Color(0x16051829), Color(0x55051829))
+                ), shape
+            ))
             Column(
                 Modifier.fillMaxSize().padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
