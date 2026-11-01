@@ -332,6 +332,21 @@ private fun MobileAdhkar(modifier: Modifier) {
                 Text(dhikr.source, color = gold, fontSize = 14.sp)
             }
         }
+        // Full verse rendered as accessible text, not a fixed poster bitmap.
+        Column(
+            Modifier.fillMaxWidth().border(1.dp, gold, shape)
+                .background(navyCard, shape).padding(13.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("آية الكرسي — مرة بعد كل صلاة مفروضة",
+                color = gold, fontSize = 19.sp, fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center)
+            Text("اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ", color = cream, fontSize = 19.sp,
+                lineHeight = 32.sp, textAlign = TextAlign.Center)
+            Text("سورة البقرة (255) • فضل قراءتها بعد الصلاة: السنن الكبرى للنسائي",
+                color = gold, fontSize = 13.sp, textAlign = TextAlign.Center)
+        }
         Column(
             Modifier.fillMaxWidth().border(1.dp, gold, shape)
                 .background(navyCard, shape).padding(12.dp),
