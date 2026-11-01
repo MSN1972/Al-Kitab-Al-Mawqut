@@ -11,8 +11,8 @@ android {
         applicationId = "com.alkitabmawqut.mobile"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.1.6-beta"
+        versionCode = 8
+        versionName = "0.1.7-beta"
     }
     // Reuse the existing, tested prayer engine, location and daily timetable
     // without copying the source or changing the television app.

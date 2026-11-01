@@ -31,6 +31,9 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -43,10 +46,16 @@ import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val midnight = Color(0xFF071827)
-private val navyCard = Color(0xFF133047)
-private val gold = Color(0xFFF3D38A)
-private val cream = Color(0xFFFFF8EA)
+private val midnight = Color(0xFF071826)
+private val navyCard = Color(0xFF17324A)
+private val gold = Color(0xFFD9B86C)
+private val cream = Color(0xFFF8F6F0)
+private val secondaryText = Color(0xFFD2D9E3)
+private val activeCard = Color(0xFF44566F)
+private val inactiveTab = Color(0xFF12304A)
+private val imageTextShadow = TextStyle(shadow = Shadow(
+    color = Color(0xB3000000), offset = Offset(1.5f, 2.5f), blurRadius = 5f
+))
 private val shape = RoundedCornerShape(16.dp)
 private val entryColors @Composable get() = OutlinedTextFieldDefaults.colors(
     focusedTextColor = cream, unfocusedTextColor = cream,
@@ -202,7 +211,7 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (page == item.first) gold else navyCard,
+                            containerColor = if (page == item.first) gold else inactiveTab,
                             contentColor = if (page == item.first) midnight else cream
                         ),
                         contentPadding = PaddingValues(horizontal = 5.dp, vertical = 8.dp)
@@ -238,7 +247,7 @@ private fun MobileHome(
             // protects text readability without blanketing the entire photograph.
             Box(Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
-                    listOf(Color(0x66051829), Color(0x16051829), Color(0x55051829))
+                    listOf(Color(0x57000000), Color(0x38000000), Color(0x57000000))
                 ), shape
             ))
             Column(
@@ -246,17 +255,19 @@ private fun MobileHome(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(location.label(), color = gold, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(location.label(), color = gold, fontSize = 18.sp, fontWeight = FontWeight.Bold,
+                    style = imageTextShadow)
                 Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)),
-                    color = cream, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                    color = cream, fontSize = 40.sp, fontWeight = FontWeight.Bold,
+                    style = imageTextShadow)
                 val civil = now.format(DateTimeFormatter.ofPattern("EEEE d MMMM yyyy", Locale.forLanguageTag("ar")))
-                Text(civil, color = cream, fontSize = 16.sp)
+                Text(civil, color = cream, fontSize = 16.sp, style = imageTextShadow)
                 val hijri = remember(now.toLocalDate()) {
                     try { HijrahDate.from(now.toLocalDate()).format(
                         DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("ar"))
                     ) + " هـ" } catch (_:Exception) { "" }
                 }
-                Text(hijri, color = gold, fontSize = 16.sp)
+                Text(hijri, color = gold, fontSize = 16.sp, style = imageTextShadow)
             }
         }
         Column(
@@ -277,7 +288,7 @@ private fun MobileHome(
             Row(
                 Modifier.fillMaxWidth()
                     .background(if (next.nextEvent?.date == now.toLocalDate() &&
-                        next.nextEvent?.prayerIndex == i) Color(0xFF324154) else navyCard, shape)
+                        next.nextEvent?.prayerIndex == i) activeCard else navyCard, shape)
                     .padding(horizontal = 14.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -287,14 +298,14 @@ private fun MobileHome(
                     Text(minutes?.let(::mobileTime) ?: "--:--",
                         fontSize = 19.sp, color = cream, fontWeight = FontWeight.Bold)
                     Text(minutes?.let { "الإقامة: " + mobileTime(it + offsets[i]) }
-                        ?: "لا تتوفر المواقيت", fontSize = 13.sp, color = cream)
+                        ?: "لا تتوفر المواقيت", fontSize = 13.sp, color = secondaryText)
                 }
             }
         }
         Text("المصدر: AlAdhan • طريقة الحساب: " + CalculationOptions.title(location.method),
-            color = cream, fontSize = 13.sp)
+            color = secondaryText, fontSize = 13.sp)
         Text(status + " • يُنصح بمطابقة المواقيت مع التقويم المحلي",
-            color = gold, fontSize = 12.sp)
+            color = secondaryText, fontSize = 12.sp)
         Spacer(Modifier.height(8.dp))
     }
 }
