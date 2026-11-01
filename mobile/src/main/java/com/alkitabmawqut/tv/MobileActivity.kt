@@ -102,7 +102,7 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
         previous = repository.getDay(day.minusDays(1), location)
         following = repository.getDay(day.plusDays(1), location)
         dataStatus = if (today != null) "المواقيت المخزنة" else "جاري مزامنة المواقيت..."
-        val months = listOf(YearMonth.from(day.minusDays(1)), YearMonth.from(day), YearMonth.from(day.plusDays(1))).distinct()
+        val months = ScheduleSupport.monthsFor(day)
         var synced = true
         for (month in months) if (!repository.syncMonth(month, location)) synced = false
         today = repository.getDay(day, location)
@@ -123,7 +123,10 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     val next = PrayerEngine.calculate(now, events, 0)
     BackHandler(enabled = page != "home") { page = "home" }
 
-    Column(Modifier.fillMaxSize().background(midnight)) {
+    // Respect Samsung/Android 15 status/navigation bars and the on-screen keyboard.
+    // The bottom tabs must remain inside the safe drawing area on all phone sizes.
+    Column(Modifier.fillMaxSize().background(midnight)
+        .windowInsetsPadding(WindowInsets.safeDrawing).imePadding()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, top = 12.dp, bottom = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -246,7 +249,7 @@ private fun MobileHome(
                 }
             }
         }
-        Text("طريقة الحساب: " + CalculationOptions.title(location.method),
+        Text("المصدر: AlAdhan • طريقة الحساب: " + CalculationOptions.title(location.method),
             color = cream, fontSize = 13.sp)
         Text(status + " • يُنصح بمطابقة المواقيت مع التقويم المحلي",
             color = gold, fontSize = 12.sp)
@@ -274,6 +277,17 @@ private fun MobileAdhkar(modifier: Modifier) {
                     textAlign = TextAlign.Center)
                 Text(dhikr.source, color = gold, fontSize = 14.sp)
             }
+        }
+        Column(
+            Modifier.fillMaxWidth().border(1.dp, gold, shape)
+                .background(navyCard, shape).padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("المعوذات بعد الصلاة", color = gold,
+                fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            Text(MUAWWIDHAT_GUIDANCE, color = cream,
+                fontSize = 16.sp, lineHeight = 24.sp, textAlign = TextAlign.Center)
         }
         Spacer(Modifier.height(8.dp))
     }

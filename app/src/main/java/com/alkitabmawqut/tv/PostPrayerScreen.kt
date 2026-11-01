@@ -31,11 +31,13 @@ internal data class DhikrPage(
 
 // The source text and its reference are kept together; all three pages are static
 // and do not contain animations or audio.
+internal const val MUAWWIDHAT_GUIDANCE = "سور الإخلاص والفلق والناس: مرة بعد كل صلاة، وثلاث مرات بعد الفجر والمغرب — أبو داود (1523)"
+
 internal val postPrayerPages = listOf(
     DhikrPage(
         "الاستغفار بعد السلام",
-        "أَسْتَغْفِرُ اللَّهَ  × ٣\n\nاللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ ذَا الْجَلَالِ وَالْإِكْرَامِ",
-        "صحيح مسلم (591)",
+        "أَسْتَغْفِرُ اللَّهَ  × ٣\n\nاللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+        "صحيح مسلم (591، 592)",
         32.sp
     ),
     DhikrPage(
@@ -99,6 +101,10 @@ fun PostPrayerScreen(prayerName: String, @Suppress("UNUSED_PARAMETER") pageIndex
                 DhikrCard(postPrayerPages[1], Modifier.weight(1f).fillMaxHeight(), compact, false)
             }
             DhikrCard(postPrayerPages[2], Modifier.fillMaxWidth().weight(.92f), compact, true)
+            Text(MUAWWIDHAT_GUIDANCE, color = goldBright,
+                fontSize = if (compact) 11.sp else 16.sp,
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 1, textAlign = TextAlign.Center)
             Text("تظهر الأذكار معاً بعد الصلاة، ثم تعود المواقيت تلقائياً",
                 color = cream.copy(alpha = .82f),
                 fontSize = if (compact) 12.sp else 15.sp,

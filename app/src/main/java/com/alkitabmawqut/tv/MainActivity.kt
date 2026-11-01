@@ -90,7 +90,7 @@ private fun PrayerTV(activity: ComponentActivity) {
   yesterday = repository.getDay(d.minusDays(1),location)
   today = repository.getDay(d,location)
   tomorrow = repository.getDay(d.plusDays(1),location)
-  val months = listOf(YearMonth.from(d), YearMonth.from(d.plusDays(1))).distinct()
+  val months = ScheduleSupport.monthsFor(d)
   var synced = true
   for (m in months) if (!repository.syncMonth(m,location)) synced = false
   yesterday = repository.getDay(d.minusDays(1),location)
@@ -117,24 +117,24 @@ private fun PrayerTV(activity: ComponentActivity) {
   if (picture != null) Image(bitmap = picture, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
   Box(Modifier.fillMaxSize().background(Color(0x9906162E)))
   Column(Modifier.fillMaxSize().padding(horizontal = 30.dp, vertical = 16.dp), verticalArrangement = Arrangement.SpaceBetween) {
-   Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-    Column {
+   // Keep the clock, Gregorian date and Hijri date together in a single central block.
+   // Only the default Makkah profile uses the dedicated Umm al-Qura label.
+   Box(Modifier.fillMaxWidth()) {
+    Column(Modifier.align(Alignment.CenterStart)) {
      Text("الكتاب الموقوت", color = gold, fontSize = 35.sp, fontWeight = FontWeight.Bold)
-     Text(location.label() + " • " + CalculationOptions.title(location.method),
+     Text(if (location.id == 0L && location.method == 4) "مكة المكرمة — توقيت أم القرى"
+       else location.label() + " • " + CalculationOptions.title(location.method),
        color = white, fontSize = 18.sp)
-     Text("المنطقة الزمنية: " + location.timezone, color = gold, fontSize = 15.sp)
+     Text("المصدر: AlAdhan • " + location.timezone, color = gold, fontSize = 15.sp)
     }
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-     Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)), color = Color.White, fontSize = 56.sp, fontWeight = FontWeight.Bold)
+    Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+     Text(now.format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.US)), color = white, fontSize = 56.sp, fontWeight = FontWeight.Bold)
      Text("${now.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("ar"))}، ${now.dayOfMonth} ${now.month.getDisplayName(TextStyle.FULL, Locale.forLanguageTag("ar"))} ${now.year}", color = white, fontSize = 18.sp)
-    }
-    Column(horizontalAlignment = Alignment.End) {
      val hijri = remember(now.toLocalDate()) {
       try { HijrahDate.from(now.toLocalDate()).format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("ar"))) }
       catch (_: Exception) { "" }
      }
-     Text(hijri, color = gold, fontSize = 21.sp)
-     Text("التاريخ الهجري", color = white, fontSize = 16.sp)
+     if (hijri.isNotEmpty()) Text(hijri + " هـ", color = gold, fontSize = 20.sp)
     }
    }
    Column(Modifier.align(Alignment.End).background(Color(0xF7FFF7E8), RoundedCornerShape(24.dp)).padding(horizontal = 38.dp, vertical = 24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
