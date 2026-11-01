@@ -2,6 +2,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="الكتاب الموقوت - الجوال"
+        android:icon="@drawable/ic_kitab_minaret"
+        android:roundIcon="@drawable/ic_kitab_minaret"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:usesCleartextTraffic="false"
         android:allowBackup="false">

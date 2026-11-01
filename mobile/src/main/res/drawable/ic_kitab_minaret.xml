@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Dark navy emblem with generous safe margins for circular launchers. -->
+    <path android:fillColor="#081E32" android:pathData="M0,0H108V108H0Z"/>
+    <path android:fillColor="#DAB76D" android:pathData="M14,15H94V18H14Z"/>
+    <path android:fillColor="#DAB76D" android:pathData="M14,90H94V93H14Z"/>
+    <!-- Minaret: pointed finial, balcony and lit facade. -->
+    <path android:fillColor="#F4D78E" android:pathData="M39,82H60V85H39Z"/>
+    <path android:fillColor="#EBC578" android:pathData="M42,47H57V82H42Z"/>
+    <path android:fillColor="#0B2940" android:pathData="M47,56H52V72H47Z"/>
+    <path android:fillColor="#F4D78E" android:pathData="M37,44H62V49H37Z"/>
+    <path android:fillColor="#EBC578" android:pathData="M42,42L49.5,31L57,42Z"/>
+    <path android:fillColor="#F4D78E" android:pathData="M48.5,25H50.5V33H48.5Z"/>
+    <path android:fillColor="#F4D78E" android:pathData="M47.5,22A2,2 0,1 1,51.5 22A2,2 0,1 1,47.5 22Z"/>
+    <!-- Golden crescent to the right of minaret. -->
+    <path android:fillColor="#F4D78E" android:pathData="M77,29A16,16 0,1 0,78,58A12,12 0,1 1,77,29Z"/>
+    <path android:fillColor="#F4D78E" android:pathData="M77,22L78.5,26L83,26L79.3,28.7L80.7,33L77,30.3L73.3,33L74.7,28.7L71,26L75.5,26Z"/>
+    <path android:strokeColor="#DAB76D" android:strokeWidth="2"
+        android:fillColor="#00000000" android:pathData="M28,86H82"/>
+</vector>
