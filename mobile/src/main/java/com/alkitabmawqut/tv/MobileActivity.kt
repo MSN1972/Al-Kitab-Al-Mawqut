@@ -98,12 +98,13 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     var following by remember { mutableStateOf<List<Int>?>(null) }
     var dataStatus by remember { mutableStateOf("جاري تحميل المواقيت...") }
     var page by remember { mutableStateOf("home") }
-    var showHomeNavigation by remember { mutableStateOf(false) }
+    var showNavigation by remember { mutableStateOf(false) }
     var menuInteraction by remember { mutableIntStateOf(0) }
-    LaunchedEffect(page, menuInteraction) {
-        if (page == "home" && showHomeNavigation) {
+    // The five-second deadline applies to every screen, not just prayer times.
+    LaunchedEffect(menuInteraction, showNavigation) {
+        if (showNavigation) {
             delay(5000)
-            showHomeNavigation = false
+            showNavigation = false
         }
     }
     val offsets = remember {
@@ -155,13 +156,13 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
     // The bottom tabs must remain inside the safe drawing area on all phone sizes.
     Column(Modifier.fillMaxSize().background(midnight)
         .windowInsetsPadding(WindowInsets.safeDrawing).imePadding()
-        .pointerInput(page) {
+        .pointerInput(Unit) {
             awaitPointerEventScope {
                 while (true) {
                     val event = awaitPointerEvent()
-                    if (page == "home" && (event.type == PointerEventType.Move ||
-                            event.type == PointerEventType.Press)) {
-                        showHomeNavigation = true
+                    if (event.type == PointerEventType.Move ||
+                            event.type == PointerEventType.Press) {
+                        showNavigation = true
                         menuInteraction++
                     }
                 }
@@ -197,7 +198,7 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                 },
                 modifier = Modifier.weight(1f))
         }
-        if (page != "home" || showHomeNavigation) {
+        if (showNavigation) {
             Row(
                 Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
                 horizontalArrangement = Arrangement.spacedBy(7.dp)
@@ -207,7 +208,9 @@ private fun MobilePrayerApp(activity: ComponentActivity) {
                     Button(
                         onClick = {
                             page = item.first
-                            if (page == "home") showHomeNavigation = false
+                            // Start a fresh five-second window after switching pages.
+                            showNavigation = true
+                            menuInteraction++
                         },
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(
